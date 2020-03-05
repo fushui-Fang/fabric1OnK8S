@@ -1,0 +1,1816 @@
+
+# Source: fabric/templates/orderer.yaml
+# namespace
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: orderer1
+---
+# Source: fabric/templates/peer.yaml
+# namespace
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: org2
+---
+# Source: fabric/templates/peer.yaml
+# namespace
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: org1
+---
+# Source: fabric/templates/orderer.yaml
+# persistent volume
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: orderer1-shared
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: orderer1
+    name: orderer1-shared
+  nfs:
+    path: /opt/share/mycluster/resources/crypto-config/ordererOrganizations/orderer1
+    server: 172.18.158.121
+---
+# Source: fabric/templates/peer.yaml
+# shared persistent volume
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: org2-shared
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: org2
+    name: org2-shared
+  nfs:
+    path: /opt/share/mycluster/resources/crypto-config/peerOrganizations/org2
+    server: 172.18.158.121
+---
+# Source: fabric/templates/peer.yaml
+# cli persistent volume
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: org1-cli
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: org1
+    name: org1-cli
+  nfs:
+    path: /opt/share/mycluster/resources/
+    server: 172.18.158.121
+---
+# Source: fabric/templates/peer.yaml
+# shared persistent volume
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: org1-shared
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: org1
+    name: org1-shared
+  nfs:
+    path: /opt/share/mycluster/resources/crypto-config/peerOrganizations/org1
+    server: 172.18.158.121
+---
+# Source: fabric/templates/peer.yaml
+# cli persistent volume
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: org2-cli
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: org2
+    name: org2-cli
+  nfs:
+    path: /opt/share/mycluster/resources/
+    server: 172.18.158.121
+---
+# Source: fabric/templates/orderer.yaml
+# persistent volume claim
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ namespace: orderer1
+ name: orderer1-shared
+spec:
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 10Mi
+---
+# Source: fabric/templates/peer.yaml
+# shared persistent volume claim
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ namespace: org1
+ name: org1-shared
+spec:
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 10Mi
+---
+# Source: fabric/templates/peer.yaml
+# cli persistent volume claim
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ namespace: org1
+ name: org1-cli
+spec:
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 10Mi
+---
+# Source: fabric/templates/peer.yaml
+# cli persistent volume claim
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ namespace: org2
+ name: org2-cli
+spec:
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 10Mi
+---
+# Source: fabric/templates/peer.yaml
+# shared persistent volume claim
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ namespace: org2
+ name: org2-shared
+spec:
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 10Mi
+---
+# Source: fabric/templates/orderer.yaml
+# the service of orderer
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderer1
+  namespace: orderer1
+spec:
+ selector:
+   app: hyperledger
+   role: orderer
+   orderer-id: orderer1
+   org: orderer1
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 7050
+     targetPort: 7050
+---
+# Source: fabric/templates/orderer.yaml
+# the service of zookeeper2
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: zookeeper2
+spec:
+ selector:
+   app: hyperledger
+   role: zookeeper
+   zookeeper-id: zookeeper2
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: client
+     port: 2181
+   - name: peer
+     port: 2888
+   - name: leader-election
+     port: 3888
+---
+# Source: fabric/templates/orderer.yaml
+# the service of zookeeper0
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: zookeeper0
+spec:
+ selector:
+   app: hyperledger
+   role: zookeeper
+   zookeeper-id: zookeeper0
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: client
+     port: 2181
+   - name: peer
+     port: 2888
+   - name: leader-election
+     port: 3888
+---
+# Source: fabric/templates/orderer.yaml
+# the service of kafka2
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: kafka2
+spec:
+ selector:
+   app: hyperledger
+   role: kafka
+   kafka-id: kafka2
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 9092
+---
+# Source: fabric/templates/orderer.yaml
+# the service of kafka0
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: kafka0
+spec:
+ selector:
+   app: hyperledger
+   role: kafka
+   kafka-id: kafka0
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 9092
+---
+# Source: fabric/templates/orderer.yaml
+# the service of orderer
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderer0
+  namespace: orderer1
+spec:
+ selector:
+   app: hyperledger
+   role: orderer
+   orderer-id: orderer0
+   org: orderer1
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 7050
+     targetPort: 7050
+---
+# Source: fabric/templates/orderer.yaml
+# the service of zookeeper1
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: zookeeper1
+spec:
+ selector:
+   app: hyperledger
+   role: zookeeper
+   zookeeper-id: zookeeper1
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: client
+     port: 2181
+   - name: peer
+     port: 2888
+   - name: leader-election
+     port: 3888
+---
+# Source: fabric/templates/orderer.yaml
+# the service of kafka1
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: kafka1
+spec:
+ selector:
+   app: hyperledger
+   role: kafka
+   kafka-id: kafka1
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 9092
+---
+# Source: fabric/templates/orderer.yaml
+# the service of orderer
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderer2
+  namespace: orderer1
+spec:
+ selector:
+   app: hyperledger
+   role: orderer
+   orderer-id: orderer2
+   org: orderer1
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 7050
+     targetPort: 7050
+---
+# Source: fabric/templates/peer.yaml
+# the service of ca
+
+apiVersion: v1
+kind: Service
+metadata:
+   namespace: org2
+   name: ca
+spec:
+ selector:
+   app: hyperledger
+   role: ca
+   org: org2
+   name: ca
+ ports:
+   - name: endpoint
+     protocol: TCP
+     port: 7054
+     targetPort: 7054
+---
+# Source: fabric/templates/peer.yaml
+# the service of ca
+
+apiVersion: v1
+kind: Service
+metadata:
+   namespace: org1
+   name: ca
+spec:
+ selector:
+   app: hyperledger
+   role: ca
+   org: org1
+   name: ca
+ ports:
+   - name: endpoint
+     protocol: TCP
+     port: 7054
+     targetPort: 7054
+---
+# Source: fabric/templates/peer.yaml
+# the service of peer
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org1
+  name: peer0
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer0
+    org: org1
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+---
+# Source: fabric/templates/peer.yaml
+# the service of peer
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org2
+  name: peer1
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer1
+    org: org2
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+---
+# Source: fabric/templates/peer.yaml
+# the service of peer
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org1
+  name: peer1
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer1
+    org: org1
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+---
+# Source: fabric/templates/peer.yaml
+# the service of peer
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org2
+  name: peer0
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer0
+    org: org2
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of orderer
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: orderer1
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: orderer
+        org: orderer1
+        orderer-id: orderer1
+    spec:
+      containers:
+      - name: orderer1
+        image: hyperledger/fabric-orderer:x86_64-1.0.5
+        env:
+        - name: ORDERER_GENERAL_LOGLEVEL
+          value: debug
+        - name: ORDERER_GENERAL_LISTENADDRESS
+          value: 0.0.0.0
+        - name: ORDERER_GENERAL_GENESISMETHOD
+          value: file
+        - name: ORDERER_GENERAL_GENESISFILE
+          value: /var/hyperledger/orderer/block/genesis.block
+        - name: ORDERER_GENERAL_LOCALMSPID
+          value: orderer1MSP
+        - name: ORDERER_GENERAL_LOCALMSPDIR
+          value: /var/hyperledger/orderer/msp
+        - name: ORDERER_GENERAL_TLS_ENABLED
+          value: "true"
+        - name: ORDERER_GENERAL_TLS_PRIVATEKEY
+          value: /var/hyperledger/orderer/tls/server.key
+        - name: ORDERER_GENERAL_TLS_CERTIFICATE
+          value: /var/hyperledger/orderer/tls/server.crt
+        - name: ORDERER_GENERAL_TLS_ROOTCAS
+          value: '[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/orderer/tls/ca_p0o1.crt, /var/hyperledger/orderer/tls/ca_p1o1.crt, /var/hyperledger/orderer/tls/ca_p0o2.crt, /var/hyperledger/orderer/tls/ca_p1o2.crt]'
+        - name: ORDERER_KAFKA_RETRY_SHORTINTERVAL
+          value: "5s"
+        - name: ORDERER_KAFKA_RETRY_SHORTTOTAL
+          value: "30s"
+        - name: ORDERER_KAFKA_VERBOSE
+          value: "true"
+        - name: ORDERER_KAFKA_BROKERS
+          value: "[kafka0:9092,kafka1:9092,kafka2:9092]"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7050
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 15; orderer"]
+        volumeMounts:
+         - mountPath: /var/hyperledger/orderer/msp
+           name: certificate
+           subPath: orderers/orderer1.orderer1/msp
+         - mountPath: /var/hyperledger/orderer/tls
+           name: certificate
+           subPath: orderers/orderer1.orderer1/tls
+         - mountPath: /var/hyperledger/orderer/block
+           name: certificate
+           subPath: block
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: orderers/orderer1.orderer1/production
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: orderer1-shared
+---
+# Source: fabric/templates/orderer.yaml
+# orderers
+# the deployment of orderer
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: orderer0
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: orderer
+        org: orderer1
+        orderer-id: orderer0
+    spec:
+      containers:
+      - name: orderer0
+        image: hyperledger/fabric-orderer:x86_64-1.0.5
+        env:
+        - name: ORDERER_GENERAL_LOGLEVEL
+          value: debug
+        - name: ORDERER_GENERAL_LISTENADDRESS
+          value: 0.0.0.0
+        - name: ORDERER_GENERAL_GENESISMETHOD
+          value: file
+        - name: ORDERER_GENERAL_GENESISFILE
+          value: /var/hyperledger/orderer/block/genesis.block
+        - name: ORDERER_GENERAL_LOCALMSPID
+          value: orderer1MSP
+        - name: ORDERER_GENERAL_LOCALMSPDIR
+          value: /var/hyperledger/orderer/msp
+        - name: ORDERER_GENERAL_TLS_ENABLED
+          value: "true"
+        - name: ORDERER_GENERAL_TLS_PRIVATEKEY
+          value: /var/hyperledger/orderer/tls/server.key
+        - name: ORDERER_GENERAL_TLS_CERTIFICATE
+          value: /var/hyperledger/orderer/tls/server.crt
+        - name: ORDERER_GENERAL_TLS_ROOTCAS
+          value: '[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/orderer/tls/ca_p0o1.crt, /var/hyperledger/orderer/tls/ca_p1o1.crt, /var/hyperledger/orderer/tls/ca_p0o2.crt, /var/hyperledger/orderer/tls/ca_p1o2.crt]'
+        - name: ORDERER_KAFKA_RETRY_SHORTINTERVAL
+          value: "5s"
+        - name: ORDERER_KAFKA_RETRY_SHORTTOTAL
+          value: "30s"
+        - name: ORDERER_KAFKA_VERBOSE
+          value: "true"
+        - name: ORDERER_KAFKA_BROKERS
+          value: "[kafka0:9092,kafka1:9092,kafka2:9092]"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7050
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 15; orderer"]
+        volumeMounts:
+         - mountPath: /var/hyperledger/orderer/msp
+           name: certificate
+           subPath: orderers/orderer0.orderer1/msp
+         - mountPath: /var/hyperledger/orderer/tls
+           name: certificate
+           subPath: orderers/orderer0.orderer1/tls
+         - mountPath: /var/hyperledger/orderer/block
+           name: certificate
+           subPath: block
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: orderers/orderer0.orderer1/production
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: orderer1-shared
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of kafka0
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: kafka0
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: kafka
+        org: orderer1
+        kafka-id: kafka0
+    spec:
+      containers:
+      - name: kafka0
+        image: hyperledger/fabric-kafka:x86_64-1.0.5
+        env:
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "1048576"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "1048576"
+        - name: KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE
+          value: "false"
+        - name: KAFKA_BROKER_ID
+          value: "0"
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: "2"
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zookeeper0:2181,zookeeper1:2181,zookeeper2:2181"
+        - name: KAFKA_ADVERTISED_HOST_NAME
+          value: kafka0
+        ports:
+         - containerPort: 9092
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of zookeeper0
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: zookeeper0
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: zookeeper
+        org: orderer1
+        zookeeper-id: zookeeper0
+    spec:
+      containers:
+      - name: zookeeper0
+        image: hyperledger/fabric-zookeeper:x86_64-1.0.5
+        env:
+        - name: ZOO_MY_ID
+          value: "1"
+        - name: ZOO_SERVERS
+          value: server.1=0.0.0.0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+        ports:
+         - containerPort: 2181
+         - containerPort: 2888
+         - containerPort: 3888
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of kafka1
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: kafka1
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: kafka
+        org: orderer1
+        kafka-id: kafka1
+    spec:
+      containers:
+      - name: kafka1
+        image: hyperledger/fabric-kafka:x86_64-1.0.5
+        env:
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "1048576"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "1048576"
+        - name: KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE
+          value: "false"
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: "2"
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zookeeper0:2181,zookeeper1:2181,zookeeper2:2181"
+        - name: KAFKA_ADVERTISED_HOST_NAME
+          value: kafka1
+        ports:
+         - containerPort: 9092
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of zookeeper1
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: zookeeper1
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: zookeeper
+        org: orderer1
+        zookeeper-id: zookeeper1
+    spec:
+      containers:
+      - name: zookeeper1
+        image: hyperledger/fabric-zookeeper:x86_64-1.0.5
+        env:
+        - name: ZOO_MY_ID
+          value: "2"
+        - name: ZOO_SERVERS
+          value: server.1=zookeeper0:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zookeeper2:2888:3888
+        ports:
+         - containerPort: 2181
+         - containerPort: 2888
+         - containerPort: 3888
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of orderer
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: orderer2
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: orderer
+        org: orderer1
+        orderer-id: orderer2
+    spec:
+      containers:
+      - name: orderer2
+        image: hyperledger/fabric-orderer:x86_64-1.0.5
+        env:
+        - name: ORDERER_GENERAL_LOGLEVEL
+          value: debug
+        - name: ORDERER_GENERAL_LISTENADDRESS
+          value: 0.0.0.0
+        - name: ORDERER_GENERAL_GENESISMETHOD
+          value: file
+        - name: ORDERER_GENERAL_GENESISFILE
+          value: /var/hyperledger/orderer/block/genesis.block
+        - name: ORDERER_GENERAL_LOCALMSPID
+          value: orderer1MSP
+        - name: ORDERER_GENERAL_LOCALMSPDIR
+          value: /var/hyperledger/orderer/msp
+        - name: ORDERER_GENERAL_TLS_ENABLED
+          value: "true"
+        - name: ORDERER_GENERAL_TLS_PRIVATEKEY
+          value: /var/hyperledger/orderer/tls/server.key
+        - name: ORDERER_GENERAL_TLS_CERTIFICATE
+          value: /var/hyperledger/orderer/tls/server.crt
+        - name: ORDERER_GENERAL_TLS_ROOTCAS
+          value: '[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/orderer/tls/ca_p0o1.crt, /var/hyperledger/orderer/tls/ca_p1o1.crt, /var/hyperledger/orderer/tls/ca_p0o2.crt, /var/hyperledger/orderer/tls/ca_p1o2.crt]'
+        - name: ORDERER_KAFKA_RETRY_SHORTINTERVAL
+          value: "5s"
+        - name: ORDERER_KAFKA_RETRY_SHORTTOTAL
+          value: "30s"
+        - name: ORDERER_KAFKA_VERBOSE
+          value: "true"
+        - name: ORDERER_KAFKA_BROKERS
+          value: "[kafka0:9092,kafka1:9092,kafka2:9092]"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7050
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 15; orderer"]
+        volumeMounts:
+         - mountPath: /var/hyperledger/orderer/msp
+           name: certificate
+           subPath: orderers/orderer2.orderer1/msp
+         - mountPath: /var/hyperledger/orderer/tls
+           name: certificate
+           subPath: orderers/orderer2.orderer1/tls
+         - mountPath: /var/hyperledger/orderer/block
+           name: certificate
+           subPath: block
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: orderers/orderer2.orderer1/production
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: orderer1-shared
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of zookeeper2
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: zookeeper2
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: zookeeper
+        org: orderer1
+        zookeeper-id: zookeeper2
+    spec:
+      containers:
+      - name: zookeeper2
+        image: hyperledger/fabric-zookeeper:x86_64-1.0.5
+        env:
+        - name: ZOO_MY_ID
+          value: "3"
+        - name: ZOO_SERVERS
+          value: server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=0.0.0.0:2888:3888
+        ports:
+         - containerPort: 2181
+         - containerPort: 2888
+         - containerPort: 3888
+---
+# Source: fabric/templates/orderer.yaml
+# the deployment of kafka2
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: kafka2
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: kafka
+        org: orderer1
+        kafka-id: kafka2
+    spec:
+      containers:
+      - name: kafka2
+        image: hyperledger/fabric-kafka:x86_64-1.0.5
+        env:
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "1048576"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "1048576"
+        - name: KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE
+          value: "false"
+        - name: KAFKA_BROKER_ID
+          value: "2"
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: "2"
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zookeeper0:2181,zookeeper1:2181,zookeeper2:2181"
+        - name: KAFKA_ADVERTISED_HOST_NAME
+          value: kafka2
+        ports:
+         - containerPort: 9092
+---
+# Source: fabric/templates/peer.yaml
+# the deployment of cli
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   namespace: org2
+   name: cli
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+       app: cli
+    spec:
+      containers:
+        - name: cli
+          image:  hyperledger/fabric-tools:x86_64-1.0.5
+          env:
+          - name: CORE_PEER_TLS_ENABLED
+            value: "false"
+          - name: CORE_PEER_TLS_CERT_FILE
+            value: /etc/hyperledger/fabric/tls/server.crt
+          - name: CORE_PEER_TLS_KEY_FILE
+            value: /etc/hyperledger/fabric/tls/server.key
+          - name: CORE_PEER_TLS_ROOTCERT_FILE
+            value: /etc/hyperledger/fabric/tls/ca.crt
+          - name: CORE_VM_ENDPOINT
+            value: unix:///host/var/run/docker.sock
+          - name: GOPATH
+            value: /opt/gopath
+          - name: CORE_LOGGING_LEVEL
+            value: DEBUG
+          - name: CORE_PEER_ID
+            value: cli
+          - name: CORE_PEER_ADDRESS
+            value: peer0:7051
+          - name: CORE_PEER_LOCALMSPID
+            value: org2MSP
+          - name: CORE_PEER_MSPCONFIGPATH
+            value: /etc/hyperledger/fabric/msp
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "while true; do sleep 30; done;" ]
+          volumeMounts:
+           - mountPath: /host/var/run/
+             name: run
+          # when enable tls , should mount orderer tls ca
+           - mountPath: /etc/hyperledger/fabric/msp
+             name: certificate
+             subPath: users/Admin@org2/msp
+           - mountPath: /etc/hyperledger/fabric/tls
+             name: certificate
+             subPath: users/Admin@org2/tls
+           - mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer/resources/chaincodes
+             name: resources
+             subPath: chaincodes
+           - mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer/resources/channel-artifacts
+             name: resources
+             subPath: channel-artifacts
+           - mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer/resources/scripts
+             name: resources
+             subPath: scripts
+           - mountPath: /etc/hyperledger/ordererOrganizations
+             name: resources
+             subPath: crypto-config/ordererOrganizations
+      volumes:
+        - name: certificate
+          persistentVolumeClaim:
+              claimName: org2-shared
+        - name: resources
+          persistentVolumeClaim:
+              claimName: org2-cli
+        - name: run
+          hostPath:
+            path: /var/run
+---
+# Source: fabric/templates/peer.yaml
+# the deployment of cli
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   namespace: org1
+   name: cli
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+       app: cli
+    spec:
+      containers:
+        - name: cli
+          image:  hyperledger/fabric-tools:x86_64-1.0.5
+          env:
+          - name: CORE_PEER_TLS_ENABLED
+            value: "false"
+          - name: CORE_PEER_TLS_CERT_FILE
+            value: /etc/hyperledger/fabric/tls/server.crt
+          - name: CORE_PEER_TLS_KEY_FILE
+            value: /etc/hyperledger/fabric/tls/server.key
+          - name: CORE_PEER_TLS_ROOTCERT_FILE
+            value: /etc/hyperledger/fabric/tls/ca.crt
+          - name: CORE_VM_ENDPOINT
+            value: unix:///host/var/run/docker.sock
+          - name: GOPATH
+            value: /opt/gopath
+          - name: CORE_LOGGING_LEVEL
+            value: DEBUG
+          - name: CORE_PEER_ID
+            value: cli
+          - name: CORE_PEER_ADDRESS
+            value: peer0:7051
+          - name: CORE_PEER_LOCALMSPID
+            value: org1MSP
+          - name: CORE_PEER_MSPCONFIGPATH
+            value: /etc/hyperledger/fabric/msp
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "while true; do sleep 30; done;" ]
+          volumeMounts:
+           - mountPath: /host/var/run/
+             name: run
+          # when enable tls , should mount orderer tls ca
+           - mountPath: /etc/hyperledger/fabric/msp
+             name: certificate
+             subPath: users/Admin@org1/msp
+           - mountPath: /etc/hyperledger/fabric/tls
+             name: certificate
+             subPath: users/Admin@org1/tls
+           - mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer/resources/chaincodes
+             name: resources
+             subPath: chaincodes
+           - mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer/resources/channel-artifacts
+             name: resources
+             subPath: channel-artifacts
+           - mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer/resources/scripts
+             name: resources
+             subPath: scripts
+           - mountPath: /etc/hyperledger/ordererOrganizations
+             name: resources
+             subPath: crypto-config/ordererOrganizations
+      volumes:
+        - name: certificate
+          persistentVolumeClaim:
+              claimName: org1-shared
+        - name: resources
+          persistentVolumeClaim:
+              claimName: org1-cli
+        - name: run
+          hostPath:
+            path: /var/run
+---
+# Source: fabric/templates/peer.yaml
+# peers
+# the deployment of peer
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org2
+  name:	peer0
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+       app: hyperledger
+       role: peer
+       peer-id: peer0
+       org: org2
+    spec:
+      containers:
+      - name: couchdb
+        image: hyperledger/fabric-couchdb:x86_64-1.0.5
+        ports:
+         - containerPort: 5984
+      - name: peer0 
+        image: hyperledger/fabric-peer:x86_64-1.0.5
+        env:
+        - name: CORE_PEER_ADDRESSAUTODETECT
+          value: "true"
+        - name: CORE_LEDGER_STATE_STATEDATABASE
+          value: "CouchDB"
+        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+          value: "localhost:5984"
+        - name: CORE_VM_ENDPOINT
+          value: "unix:///host/var/run/docker.sock"
+        - name: CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
+          value: "bridge"
+        #- name: CORE_VM_DOCKER_HOSTCONFIG_DNS
+        #  value: "10.100.200.10"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: "/etc/hyperledger/fabric/tls/server.crt" 
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: "/etc/hyperledger/fabric/tls/server.key"
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: "/etc/hyperledger/fabric/tls/ca.crt"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_ENABLED
+          value: "true"
+        - name: CORE_PEER_GOSSIP_USELEADERELECTION
+          value: "true"
+        - name: CORE_PEER_GOSSIP_ORGLEADER
+          value: "false"
+        - name: CORE_PEER_PROFILE_ENABLED
+          value: "false"
+        - name: CORE_PEER_ID
+          value: peer0.org2
+        - name: CORE_PEER_ADDRESS
+          value: peer0:7051
+        - name: CORE_PEER_LOCALMSPID
+          value: org2MSP
+        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+          value: peer0:7051
+        - name: CORE_CHAINCODE_STARTUPTIMEOUT
+          value: "30s"
+        - name: CORE_CHAINCODE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_MSPCONFIGPATH
+          value: "/etc/hyperledger/fabric/msp"
+        - name: CORE_PEER_GOSSIP_SKIPHANDSHAKE
+          value: "true"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7051
+         - containerPort: 7052
+         - containerPort: 7053
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 5; peer node start"]
+        volumeMounts:
+         - mountPath: /etc/hyperledger/fabric/msp 
+           name: certificate
+           subPath: peers/peer0.org2/msp
+         - mountPath: /etc/hyperledger/fabric/tls
+           name: certificate
+           subPath: peers/peer0.org2/tls
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: peers/peer0.org2/production
+         - mountPath: /host/var/run
+           name: run
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org2-shared
+       - name: run
+         hostPath:
+           path: /var/run
+---
+# Source: fabric/templates/peer.yaml
+# the deployment of ca
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org1
+  name: ca
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+       app: hyperledger
+       role: ca
+       org: org1
+       name: ca
+    spec:
+     containers:
+       - name: ca
+         image: hyperledger/fabric-ca:x86_64-1.0.5
+         env: 
+         - name:  FABRIC_CA_HOME
+           value: /etc/hyperledger/fabric-ca-server
+         - name:  FABRIC_CA_SERVER_CA_NAME
+           value: ca
+         - name:  FABRIC_CA_SERVER_TLS_ENABLED
+           value: "true"
+         - name:  FABRIC_CA_SERVER_CA_CERTFILE
+           value: /etc/hyperledger/fabric-ca-server-config/ca.org1-cert.pem
+         - name:  FABRIC_CA_SERVER_CA_KEYFILE
+           value: /etc/hyperledger/fabric-ca-server-config/80ffca3fc3da9ac527572a6ab90114451dfd8fe4f43782cb7b8067b6387758ee_sk
+         - name:  FABRIC_CA_SERVER_TLS_CERTFILE
+           value: /etc/hyperledger/fabric-ca-server-config/ca.org1-cert.pem
+         - name:  FABRIC_CA_SERVER_TLS_KEYFILE
+           value: /etc/hyperledger/fabric-ca-server-config/80ffca3fc3da9ac527572a6ab90114451dfd8fe4f43782cb7b8067b6387758ee_sk
+         ports:
+          - containerPort: 7054
+         command: ["sh"]
+         args:  ["-c", " fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org1-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/80ffca3fc3da9ac527572a6ab90114451dfd8fe4f43782cb7b8067b6387758ee_sk -b admin:adminpw -d "]
+         volumeMounts:
+          - mountPath: /etc/hyperledger/fabric-ca-server-config
+            name: certificate
+            subPath: ca/
+          - mountPath: /etc/hyperledger/fabric-ca-server
+            name: certificate
+            subPath: fabric-ca-server/
+     volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org1-shared
+---
+# Source: fabric/templates/peer.yaml
+# the deployment of peer
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org1
+  name:	peer1
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+       app: hyperledger
+       role: peer
+       peer-id: peer1
+       org: org1
+    spec:
+      containers:
+      - name: couchdb
+        image: hyperledger/fabric-couchdb:x86_64-1.0.5
+        ports:
+         - containerPort: 5984
+      - name: peer1 
+        image: hyperledger/fabric-peer:x86_64-1.0.5
+        env:
+        - name: CORE_PEER_ADDRESSAUTODETECT
+          value: "true"
+        - name: CORE_LEDGER_STATE_STATEDATABASE
+          value: "CouchDB"
+        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+          value: "localhost:5984"
+        - name: CORE_VM_ENDPOINT
+          value: "unix:///host/var/run/docker.sock"
+        - name: CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
+          value: "bridge"
+        #- name: CORE_VM_DOCKER_HOSTCONFIG_DNS
+        #  value: "10.100.200.10"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: "/etc/hyperledger/fabric/tls/server.crt" 
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: "/etc/hyperledger/fabric/tls/server.key"
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: "/etc/hyperledger/fabric/tls/ca.crt"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_ENABLED
+          value: "true"
+        - name: CORE_PEER_GOSSIP_USELEADERELECTION
+          value: "true"
+        - name: CORE_PEER_GOSSIP_ORGLEADER
+          value: "false"
+        - name: CORE_PEER_PROFILE_ENABLED
+          value: "false"
+        - name: CORE_PEER_ID
+          value: peer1.org1
+        - name: CORE_PEER_ADDRESS
+          value: peer1:7051
+        - name: CORE_PEER_LOCALMSPID
+          value: org1MSP
+        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+          value: peer1:7051
+        - name: CORE_CHAINCODE_STARTUPTIMEOUT
+          value: "30s"
+        - name: CORE_CHAINCODE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_MSPCONFIGPATH
+          value: "/etc/hyperledger/fabric/msp"
+        - name: CORE_PEER_GOSSIP_SKIPHANDSHAKE
+          value: "true"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7051
+         - containerPort: 7052
+         - containerPort: 7053
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 5; peer node start"]
+        volumeMounts:
+         - mountPath: /etc/hyperledger/fabric/msp 
+           name: certificate
+           subPath: peers/peer1.org1/msp
+         - mountPath: /etc/hyperledger/fabric/tls
+           name: certificate
+           subPath: peers/peer1.org1/tls
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: peers/peer1.org1/production
+         - mountPath: /host/var/run
+           name: run
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org1-shared
+       - name: run
+         hostPath:
+           path: /var/run
+---
+# Source: fabric/templates/peer.yaml
+# the deployment of ca
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org2
+  name: ca
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+       app: hyperledger
+       role: ca
+       org: org2
+       name: ca
+    spec:
+     containers:
+       - name: ca
+         image: hyperledger/fabric-ca:x86_64-1.0.5
+         env: 
+         - name:  FABRIC_CA_HOME
+           value: /etc/hyperledger/fabric-ca-server
+         - name:  FABRIC_CA_SERVER_CA_NAME
+           value: ca
+         - name:  FABRIC_CA_SERVER_TLS_ENABLED
+           value: "true"
+         - name:  FABRIC_CA_SERVER_CA_CERTFILE
+           value: /etc/hyperledger/fabric-ca-server-config/ca.org2-cert.pem
+         - name:  FABRIC_CA_SERVER_CA_KEYFILE
+           value: /etc/hyperledger/fabric-ca-server-config/fdd4e5c8ce5c9804205c4fd9e3f76ba65698a5d2abbe9e983dbf33c2c60e5cb5_sk
+         - name:  FABRIC_CA_SERVER_TLS_CERTFILE
+           value: /etc/hyperledger/fabric-ca-server-config/ca.org2-cert.pem
+         - name:  FABRIC_CA_SERVER_TLS_KEYFILE
+           value: /etc/hyperledger/fabric-ca-server-config/fdd4e5c8ce5c9804205c4fd9e3f76ba65698a5d2abbe9e983dbf33c2c60e5cb5_sk
+         ports:
+          - containerPort: 7054
+         command: ["sh"]
+         args:  ["-c", " fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org2-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/fdd4e5c8ce5c9804205c4fd9e3f76ba65698a5d2abbe9e983dbf33c2c60e5cb5_sk -b admin:adminpw -d "]
+         volumeMounts:
+          - mountPath: /etc/hyperledger/fabric-ca-server-config
+            name: certificate
+            subPath: ca/
+          - mountPath: /etc/hyperledger/fabric-ca-server
+            name: certificate
+            subPath: fabric-ca-server/
+     volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org2-shared
+---
+# Source: fabric/templates/peer.yaml
+# the deployment of peer
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org2
+  name:	peer1
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+       app: hyperledger
+       role: peer
+       peer-id: peer1
+       org: org2
+    spec:
+      containers:
+      - name: couchdb
+        image: hyperledger/fabric-couchdb:x86_64-1.0.5
+        ports:
+         - containerPort: 5984
+      - name: peer1 
+        image: hyperledger/fabric-peer:x86_64-1.0.5
+        env:
+        - name: CORE_PEER_ADDRESSAUTODETECT
+          value: "true"
+        - name: CORE_LEDGER_STATE_STATEDATABASE
+          value: "CouchDB"
+        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+          value: "localhost:5984"
+        - name: CORE_VM_ENDPOINT
+          value: "unix:///host/var/run/docker.sock"
+        - name: CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
+          value: "bridge"
+        #- name: CORE_VM_DOCKER_HOSTCONFIG_DNS
+        #  value: "10.100.200.10"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: "/etc/hyperledger/fabric/tls/server.crt" 
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: "/etc/hyperledger/fabric/tls/server.key"
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: "/etc/hyperledger/fabric/tls/ca.crt"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_ENABLED
+          value: "true"
+        - name: CORE_PEER_GOSSIP_USELEADERELECTION
+          value: "true"
+        - name: CORE_PEER_GOSSIP_ORGLEADER
+          value: "false"
+        - name: CORE_PEER_PROFILE_ENABLED
+          value: "false"
+        - name: CORE_PEER_ID
+          value: peer1.org2
+        - name: CORE_PEER_ADDRESS
+          value: peer1:7051
+        - name: CORE_PEER_LOCALMSPID
+          value: org2MSP
+        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+          value: peer1:7051
+        - name: CORE_CHAINCODE_STARTUPTIMEOUT
+          value: "30s"
+        - name: CORE_CHAINCODE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_MSPCONFIGPATH
+          value: "/etc/hyperledger/fabric/msp"
+        - name: CORE_PEER_GOSSIP_SKIPHANDSHAKE
+          value: "true"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7051
+         - containerPort: 7052
+         - containerPort: 7053
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 5; peer node start"]
+        volumeMounts:
+         - mountPath: /etc/hyperledger/fabric/msp 
+           name: certificate
+           subPath: peers/peer1.org2/msp
+         - mountPath: /etc/hyperledger/fabric/tls
+           name: certificate
+           subPath: peers/peer1.org2/tls
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: peers/peer1.org2/production
+         - mountPath: /host/var/run
+           name: run
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org2-shared
+       - name: run
+         hostPath:
+           path: /var/run
+---
+# Source: fabric/templates/peer.yaml
+# peers
+# the deployment of peer
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org1
+  name:	peer0
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+       app: hyperledger
+       role: peer
+       peer-id: peer0
+       org: org1
+    spec:
+      containers:
+      - name: couchdb
+        image: hyperledger/fabric-couchdb:x86_64-1.0.5
+        ports:
+         - containerPort: 5984
+      - name: peer0 
+        image: hyperledger/fabric-peer:x86_64-1.0.5
+        env:
+        - name: CORE_PEER_ADDRESSAUTODETECT
+          value: "true"
+        - name: CORE_LEDGER_STATE_STATEDATABASE
+          value: "CouchDB"
+        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+          value: "localhost:5984"
+        - name: CORE_VM_ENDPOINT
+          value: "unix:///host/var/run/docker.sock"
+        - name: CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
+          value: "bridge"
+        #- name: CORE_VM_DOCKER_HOSTCONFIG_DNS
+        #  value: "10.100.200.10"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: "/etc/hyperledger/fabric/tls/server.crt" 
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: "/etc/hyperledger/fabric/tls/server.key"
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: "/etc/hyperledger/fabric/tls/ca.crt"
+        - name: CORE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_TLS_ENABLED
+          value: "true"
+        - name: CORE_PEER_GOSSIP_USELEADERELECTION
+          value: "true"
+        - name: CORE_PEER_GOSSIP_ORGLEADER
+          value: "false"
+        - name: CORE_PEER_PROFILE_ENABLED
+          value: "false"
+        - name: CORE_PEER_ID
+          value: peer0.org1
+        - name: CORE_PEER_ADDRESS
+          value: peer0:7051
+        - name: CORE_PEER_LOCALMSPID
+          value: org1MSP
+        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+          value: peer0:7051
+        - name: CORE_CHAINCODE_STARTUPTIMEOUT
+          value: "30s"
+        - name: CORE_CHAINCODE_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CORE_PEER_MSPCONFIGPATH
+          value: "/etc/hyperledger/fabric/msp"
+        - name: CORE_PEER_GOSSIP_SKIPHANDSHAKE
+          value: "true"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        ports:
+         - containerPort: 7051
+         - containerPort: 7052
+         - containerPort: 7053
+        command: ["/bin/bash", "-c", "--"]
+        args: ["sleep 5; peer node start"]
+        volumeMounts:
+         - mountPath: /etc/hyperledger/fabric/msp 
+           name: certificate
+           subPath: peers/peer0.org1/msp
+         - mountPath: /etc/hyperledger/fabric/tls
+           name: certificate
+           subPath: peers/peer0.org1/tls
+         - mountPath: /var/hyperledger/production
+           name: certificate
+           subPath: peers/peer0.org1/production
+         - mountPath: /host/var/run
+           name: run
+      volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org1-shared
+       - name: run
+         hostPath:
+           path: /var/run
+---
+# Source: fabric/templates/orderer.yaml
+# the ingress of orderer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: orderer2
+  namespace: orderer1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/orderer1/orderer2
+        backend:
+          serviceName: orderer2
+          servicePort: 7050
+---
+# Source: fabric/templates/orderer.yaml
+# the ingress of orderer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: orderer1
+  namespace: orderer1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/orderer1/orderer1
+        backend:
+          serviceName: orderer1
+          servicePort: 7050
+---
+# Source: fabric/templates/orderer.yaml
+# the ingress of orderer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: orderer0
+  namespace: orderer1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/orderer1/orderer0
+        backend:
+          serviceName: orderer0
+          servicePort: 7050
+---
+# Source: fabric/templates/peer.yaml
+# the ingress of peer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: peer1
+  namespace: org1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/org1/peer1
+        backend:
+          serviceName: peer1
+          servicePort: 7051
+---
+# Source: fabric/templates/peer.yaml
+# the ingress of peer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: peer0
+  namespace: org2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/org2/peer0
+        backend:
+          serviceName: peer0
+          servicePort: 7051
+---
+# Source: fabric/templates/peer.yaml
+# the ingress of peer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: peer0
+  namespace: org1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/org1/peer0
+        backend:
+          serviceName: peer0
+          servicePort: 7051
+---
+# Source: fabric/templates/peer.yaml
+# the ingress of peer
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: peer1
+  namespace: org2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/org2/peer1
+        backend:
+          serviceName: peer1
+          servicePort: 7051
+---
+# Source: fabric/templates/peer.yaml
+# the ingress of ca
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ca
+  namespace: org2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/org2/ca
+        backend:
+          serviceName: ca
+          servicePort: 7054
+---
+# Source: fabric/templates/peer.yaml
+# the ingress of ca
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ca
+  namespace: org1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /fabric/mycluster/org1/ca
+        backend:
+          serviceName: ca
+          servicePort: 7054

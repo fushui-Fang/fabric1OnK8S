@@ -1,0 +1,201 @@
+# orderer1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderer0-ex
+  namespace: orderer1
+spec:
+ selector:
+   app: hyperledger
+   role: orderer
+   orderer-id: orderer0
+   org: orderer1
+ type: NodePort
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 7050
+     targetPort: 7050
+     nodePort: 30750
+---
+
+
+# CA-ORG1
+---
+apiVersion: v1
+kind: Service
+metadata:
+   namespace: org1
+   name: ca-ex
+spec:
+ selector:
+   app: hyperledger
+   role: ca
+   org: org1
+   name: ca
+ type: NodePort
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 7054
+     targetPort: 7054
+     nodePort: 30754
+---
+
+
+# CA-ORG2
+---
+apiVersion: v1
+kind: Service
+metadata:
+   namespace: org2
+   name: ca-ex
+spec:
+ selector:
+   app: hyperledger
+   role: ca
+   org: org2
+   name: ca
+ type: NodePort
+ ports:
+   - name: listen-endpoint
+     protocol: TCP
+     port: 7054
+     targetPort: 7054
+     nodePort: 30756
+
+
+# PEER0-ORG1
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org1
+  name: peer0-ex
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer0
+    org: org1
+  type: NodePort
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+      nodePort: 30751
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+      nodePort: 30752
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+      nodePort: 30753
+---
+
+# PEER1-ORG1
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org1
+  name: peer1-ex
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer1
+    org: org1
+  type: NodePort
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+      nodePort: 31751
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+      nodePort: 31752
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+      nodePort: 31753
+---
+
+
+# PEER0-ORG2
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org2
+  name: peer0-ex
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer0
+    org: org2
+  type: NodePort
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+      nodePort: 30757
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+      nodePort: 30758
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+      nodePort: 30759
+---
+
+
+# PEER1-ORG2
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: org2
+  name: peer1-ex
+spec:
+  selector:
+    app: hyperledger
+    role: peer
+    peer-id: peer1
+    org: org2
+  type: NodePort
+  ports:
+    - name: externale-listen-endpoint
+      protocol: TCP
+      port: 7051
+      targetPort: 7051
+      nodePort: 31757
+    - name: chaincode-listen
+      protocol: TCP
+      port: 7052
+      targetPort: 7052
+      nodePort: 31758
+    - name: listen
+      protocol: TCP
+      port: 7053
+      targetPort: 7053
+      nodePort: 31759
+---

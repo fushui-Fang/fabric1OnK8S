@@ -1,0 +1,64 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: orderer1
+  name: zookeeper1
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: hyperledger
+        role: zookeeper
+        org: orderer1
+        zookeeper-id: zookeeper1
+    spec:
+      containers:
+      - name: zookeeper1
+        image: hyperledger/fabric-zookeeper:x86_64-1.0.5
+        env:
+        - name: ZOO_MY_ID
+          value: "2"
+        - name: ZOO_SERVERS
+          value: server.1=zookeeper0:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zookeeper2:2888:3888
+        ports:
+         - containerPort: 2181
+         - containerPort: 2888
+         - containerPort: 3888
+        volumeMounts:
+         - mountPath: /data
+           name: zk
+           subPath: zk1/data
+         - mountPath: /datalog
+           name: zk
+           subPath: zk1/datalog
+      volumes:
+         - name: zk
+           persistentVolumeClaim:
+              claimName: zookeeper-shared
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: orderer1
+  name: zookeeper1
+spec:
+ selector:
+   app: hyperledger
+   role: zookeeper
+   zookeeper-id: zookeeper1
+   org: orderer1
+ clusterIP: None
+ ports:
+   - name: client
+     port: 2181
+   - name: peer
+     port: 2888
+   - name: leader-election
+     port: 3888
+
+---

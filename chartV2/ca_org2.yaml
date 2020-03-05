@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: org2
+  name: ca
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+       app: hyperledger
+       role: ca
+       org: org2
+       name: ca
+    spec:
+     containers:
+       - name: ca
+         image: hyperledger/fabric-ca:x86_64-1.0.5
+         env: 
+         - name:  FABRIC_CA_HOME
+           value: /etc/hyperledger/fabric-ca-server
+         - name:  FABRIC_CA_SERVER_CA_NAME
+           value: ca
+         - name:  FABRIC_CA_SERVER_TLS_ENABLED
+           value: "true"
+         - name:  FABRIC_CA_SERVER_TLS_CERTFILE
+           value: /etc/hyperledger/fabric-ca-server-config/ca.org2-cert.pem
+         - name:  FABRIC_CA_SERVER_TLS_KEYFILE
+           value: /etc/hyperledger/fabric-ca-server-config/430c5fd7480f9f8bba87d41fbbfb8754a920fe698e5200c728f9a995c59661fa_sk
+         - name:  FABRIC_CA_SERVER_CA_CERTFILE
+           value: /etc/hyperledger/fabric-ca-server-config/ca.org2-cert.pem
+         - name:  FABRIC_CA_SERVER_CA_KEYFILE
+           value: /etc/hyperledger/fabric-ca-server-config/430c5fd7480f9f8bba87d41fbbfb8754a920fe698e5200c728f9a995c59661fa_sk
+         ports:
+          - containerPort: 7054
+         command: ["sh"]
+         args:  ["-c", " fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org2-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/430c5fd7480f9f8bba87d41fbbfb8754a920fe698e5200c728f9a995c59661fa_sk -b admin:adminpw -d "]
+         volumeMounts:
+          - mountPath: /etc/hyperledger/fabric-ca-server-config
+            name: certificate
+            subPath: ca/
+          - mountPath: /etc/hyperledger/fabric-ca-server
+            name: certificate
+            subPath: fabric-ca-server/
+     volumes:
+       - name: certificate
+         persistentVolumeClaim:
+             claimName: org2-shared 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+   namespace: org2
+   name: ca
+spec:
+ selector:
+   app: hyperledger
+   role: ca
+   org: org2
+   name: ca
+ ports:
+   - name: endpoint
+     protocol: TCP
+     port: 7054
+     targetPort: 7054
+
+---
